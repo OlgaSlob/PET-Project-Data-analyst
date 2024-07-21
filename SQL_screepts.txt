@@ -1,0 +1,64 @@
+--1.створюємо таблиці для завантаження даних
+CREATE TABLE store_spr
+( Address_Line VARCHAR2(200 BYTE),
+  City VARCHAR2(36 BYTE),
+  Continent VARCHAR2(36 BYTE),
+  Country_Region VARCHAR2(36 BYTE),
+  Employees number(10),
+  State VARCHAR2(36 BYTE),
+  Status VARCHAR2(36 BYTE),
+  Store_Name VARCHAR2(36 BYTE),
+  Store_Type VARCHAR2(36 BYTE),
+  Store_Key number(10),
+  Zip_Code VARCHAR2(36 BYTE)
+);
+CREATE TABLE product_spr
+(Product_Key number(10),
+ Product_Name VARCHAR2(200 BYTE),
+ Brand VARCHAR2(100 BYTE),
+ Class_	VARCHAR2(36 BYTE),
+ Color	VARCHAR2(36 BYTE),
+ Manufacturer VARCHAR2(100 BYTE),
+ Product_Code number(10),
+ Product_Description VARCHAR2(250 BYTE),
+ Product_Type VARCHAR2(200 BYTE),
+ Unit_Cost number(10, 4),
+ Unit_Price number(10, 4)
+);
+
+CREATE TABLE sales
+(Delivery_Date date,
+ Net_Price number(10, 4),
+ Order_Date	date,
+ Order_Line_Number number(10),
+ Product_Key number(10),
+ Quantity number(10),
+ Store_Key number(10),
+ Unit_Cost number(10, 4),
+ Unit_Discount number(10, 4),
+ Unit_Price number(10, 4)
+ );
+ 
+CREATE TABLE product_category_spr
+(Product_Name VARCHAR2(200 BYTE),
+ Product VARCHAR2(100 BYTE)
+ );
+
+--2.завантажуємо дані з файлів
+
+--3.трансформуємо і готуємо дані для подальшого аналізу в Python (збираємо в одну таблицю, додаємо додаткові поля)
+select t4.continent, t4.country_region, t1.delivery_date, t1.order_date, t3.product,
+       t1.quantity, t1.unit_price, t1.unit_discount, t1.net_price unit_net_price, 
+       t1.unit_cost, (t1.net_price-t1.unit_cost)*t1.quantity profit,
+       case when unit_discount=0 then 0 else 1 end as discount
+from sales t1
+left join
+product_spr t2
+on t1.product_key=t2.product_key
+left join
+product_category_spr t3
+on t2.product_name=t3.product_name
+left join
+store_spr t4
+on t1.store_key=t4.store_key
+;
